@@ -1,17 +1,18 @@
 package utils
 
+import models.ErrorMessages
 import models.LogRecordModel
 
 class FilesParserUtil {
 
     public static String logsDirectory = "src/main/resources"
-    public static File outPutDirectory = new File("src/main/resources/OutPutFile")
+    public static File outPutDirectory = new File(properties.get("outfile"))
     public static final EXTENSION = ".log"
 
     private static List<File> getFilesWithLogExtension() {
         File dir = new File(logsDirectory)
         if (dir == null) {
-            print("Incorrect directory name")
+            outPutErrorMessages(ErrorMessages.INVALID_DIRECTORY)
             return
         }
         List<File> files = dir.listFiles(new FilenameFilter() {
@@ -25,11 +26,11 @@ class FilesParserUtil {
 
     public static ArrayList<LogRecordModel> getLogRecordsListFromDirectory() {
         List<File> filesList = getFilesWithLogExtension()
-        List<LogRecordModel> logRecordsList = new ArrayList<>()
         if (filesList.isEmpty()) {
-            print("There are no" + EXTENSION + "files  in directory " + logsDirectory)
+            outPutErrorMessages(ErrorMessages.NO_FILES)
             return;
         } else {
+            List<LogRecordModel> logRecordsList = new ArrayList<>()
             filesList.forEach(file -> {
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     String line;
@@ -50,13 +51,21 @@ class FilesParserUtil {
     public static void outPutFilteredLogRecords(List<LogRecordModel> logRecordList) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outPutDirectory))) {
             if (logRecordList.isEmpty()) {
-                print("Log  records were not found")
+               outPutErrorMessages(ErrorMessages.NO_RECORDS)
                 return
             }
             logRecordList.forEach(record -> {
                 writer.write(record.toString())
                 writer.newLine()
             })
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void outPutErrorMessages(ErrorMessages message) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outPutDirectory))) {
+            writer.write(message.getMessage())
         } catch (IOException exception) {
             exception.printStackTrace();
         }

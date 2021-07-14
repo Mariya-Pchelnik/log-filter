@@ -4,7 +4,6 @@ import utils.FilesParserUtil
 
 class Runner {
     static void main(String[] args) {
-        List<LogRecordModel> filteredList = DataFilterUtil.filterByTimePeriod("19:30:22", "19:35:22")
-        FilesParserUtil.outPutFilteredLogRecords(filteredList)
+        FilesParserUtil.outPutFilteredLogRecords(DataFilterUtil.filterLogRecords())
     }
 }
